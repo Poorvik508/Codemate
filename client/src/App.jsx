@@ -11,7 +11,7 @@ const App = () => {
     <div>
       <ToastContainer />
       <Routes>
-        <Route path="/landing" element={<Landingpage/> } />
+        <Route path="/" element={<Landingpage/> } />
         <Route path="/login" element={<Login/> } />
         <Route path="/reset-password" element={<ResetPassword/> } />
         <Route path="/email-verify" element={<EmailVerify/> } />

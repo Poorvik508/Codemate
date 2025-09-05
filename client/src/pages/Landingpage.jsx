@@ -1,6 +1,8 @@
 import React from 'react'
 import { assets } from "../assets/assets";
+import { useNavigate } from "react-router-dom";
 const Landingpage = () => {
+  const navigate = useNavigate();
   return (
     <div className="w-full h-full bg-[#F9FAFB]">
       {/* Header */}
@@ -18,7 +20,7 @@ const Landingpage = () => {
           </p>
 
           <div className="flex items-center justify-center mt-12">
-            <button className="border border-black font-semibold text-gray-900 bg-[#14B8A6] px-6 py-3 rounded-full shadow-md hover:bg-[#0d9488] transition">
+            <button onClick={()=>navigate("/login")} className="border border-black font-semibold text-gray-900 bg-[#14B8A6] px-6 py-3 rounded-full shadow-md hover:bg-[#0d9488] transition">
               GET STARTED
             </button>
           </div>
