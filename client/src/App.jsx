@@ -1,12 +1,20 @@
 import React from 'react'
 import { Routes, Route } from 'react-router-dom'
+import Home from "./pages/Home"
+import Login from "./pages/Login"
+import ResetPassword from "./pages/ResetPassword"
+import EmailVerify from "./pages/EmailVerify"
 import Landingpage from "./pages/Landingpage"
+import { ToastContainer } from "react-toastify"
 const App = () => {
   return (
     <div>
-      {/* <ToastContainer /> */}
+      <ToastContainer />
       <Routes>
-        <Route path="/" element={<Landingpage/> } />
+        <Route path="/landing" element={<Landingpage/> } />
+        <Route path="/login" element={<Login/> } />
+        <Route path="/reset-password" element={<ResetPassword/> } />
+        <Route path="/email-verify" element={<EmailVerify/> } />
       </Routes>
     </div>
   )
