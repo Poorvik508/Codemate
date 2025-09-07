@@ -1,7 +1,9 @@
 import React from "react";
 import { Users, Bot, MessageSquare, Code2 } from "lucide-react";
+import { Navigate, useNavigate } from "react-router-dom";
 
 export default function LandingPage() {
+  const navigate = useNavigate();
   return (
     <div className="bg-[#F9FAFB] min-h-screen flex flex-col">
       {/* Header */}
@@ -9,14 +11,6 @@ export default function LandingPage() {
         <div className="flex items-center space-x-2">
           <Code2 className="text-[#14B8A6]" size={28} />
           <h1 className="text-2xl font-bold text-[#14B8A6]">Codemate</h1>
-        </div>
-        <div className="space-x-4">
-          <button className="px-4 py-2 text-[#14B8A6] border border-[#14B8A6] rounded-lg hover:bg-[#14B8A6] hover:text-white transition">
-            Login
-          </button>
-          <button className="px-4 py-2 bg-[#14B8A6] text-white rounded-lg hover:bg-[#0d9488] transition">
-            Register
-          </button>
         </div>
       </header>
 
@@ -32,10 +26,16 @@ export default function LandingPage() {
             practice, and coding projects with AI-powered partner matching.
           </p>
           <div className="space-x-4">
-            <button className="px-6 py-3 bg-[#14B8A6] text-white rounded-lg hover:bg-[#0d9488] transition">
+            <button
+              onClick={() => navigate("/login")}
+              className="px-6 py-3 bg-[#14B8A6] text-white rounded-lg hover:bg-[#0d9488] transition"
+            >
               Get Started
             </button>
-            <button className="px-6 py-3 border border-[#14B8A6] text-[#14B8A6] rounded-lg hover:bg-[#14B8A6] hover:text-white transition">
+            <button
+              onClick={() => navigate("/login")}
+              className="px-6 py-3 border border-[#14B8A6] text-[#14B8A6] rounded-lg hover:bg-[#14B8A6] hover:text-white transition"
+            >
               Login
             </button>
           </div>

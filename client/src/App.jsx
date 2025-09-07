@@ -6,16 +6,21 @@ import ResetPassword from "./pages/ResetPassword"
 import Landingpage from "./pages/Landingpage"
 import { ToastContainer } from "react-toastify"
 import Profile from "./pages/Profile"
+import ChatbotPage from "./pages/Chatbot"
+
 
 const App = () => {
   return (
     <div>
       <ToastContainer />
       <Routes>
+
+        <Route path="/chat-bot" element={<ChatbotPage/> } />
         <Route path="/profile" element={<Profile/> } />
         <Route path="/" element={<Landingpage/> } />
         <Route path="/login" element={<Login/> } />
         <Route path="/reset-password" element={<ResetPassword/> } />
+        
        
       </Routes>
     </div>
