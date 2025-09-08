@@ -7,7 +7,7 @@ import Landingpage from "./pages/Landingpage"
 import { ToastContainer } from "react-toastify"
 import Profile from "./pages/Profile"
 import ChatbotPage from "./pages/Chatbot"
-
+import MatchesPage from "./pages/Matches"
 
 const App = () => {
   return (
@@ -20,6 +20,7 @@ const App = () => {
         <Route path="/" element={<Landingpage/> } />
         <Route path="/login" element={<Login/> } />
         <Route path="/reset-password" element={<ResetPassword/> } />
+        <Route path="/matches" element={<MatchesPage/> } />
         
        
       </Routes>
