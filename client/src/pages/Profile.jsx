@@ -80,9 +80,9 @@ const ProfilePage = ({ isOwnProfile = true }) => {
         {/* Profile Card */}
         <div className="bg-white shadow-lg rounded-xl p-6 flex flex-col sm:flex-row items-center sm:items-start gap-6 w-full">
           <img
-            src={user.profilePic || "https://via.placeholder.com/120"}
+            src={user.profilePic || "https://via.placeholder.com/180"}
             alt="Profile"
-            className="w-28 h-28 rounded-full object-cover shadow"
+            className="w-40 h-40 sm:w-48 sm:h-48 rounded-full object-cover shadow"
           />
           <div className="text-center sm:text-left flex-1">
             <h2 className="text-3xl font-bold text-gray-900">{user.name}</h2>
@@ -155,9 +155,9 @@ const ProfilePage = ({ isOwnProfile = true }) => {
               {/* Profile Picture Upload */}
               <div className="flex flex-col items-center mb-4">
                 <img
-                  src={user.profilePic || "https://via.placeholder.com/120"}
+                  src={user.profilePic || "https://via.placeholder.com/180"}
                   alt="Profile"
-                  className="w-28 h-28 rounded-full object-cover shadow mb-2"
+                  className="w-40 h-40 sm:w-48 sm:h-48 rounded-full object-cover shadow mb-2"
                 />
                 <label className="cursor-pointer px-4 py-2 bg-teal-500 text-white rounded hover:bg-teal-700 transition text-sm">
                   Change Photo
