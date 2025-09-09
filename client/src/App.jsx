@@ -8,6 +8,7 @@ import { ToastContainer } from "react-toastify"
 import Profile from "./pages/Profile"
 import ChatbotPage from "./pages/Chatbot"
 import MatchesPage from "./pages/Matches"
+import Messages from "./pages/Messages"
 
 const App = () => {
   return (
@@ -21,6 +22,7 @@ const App = () => {
         <Route path="/login" element={<Login/> } />
         <Route path="/reset-password" element={<ResetPassword/> } />
         <Route path="/matches" element={<MatchesPage/> } />
+        <Route path="/message" element={<Messages/> } />
         
        
       </Routes>
