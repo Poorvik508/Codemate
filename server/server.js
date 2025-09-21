@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -8,8 +9,9 @@ import connnectDB from "./config/mongodb.js";
 import authRouter from "./routes/authRoutes.js";
 import userRouter from "./routes/userRoutes.js";
 import messageRouter from "./routes/messageRoutes.js";
+import profileRoutes from "./routes/profileRoutes.js"
+import fileUpload from 'express-fileupload';
 
-dotenv.config();
 const app = express();
 const port = process.env.PORT || 4000;
 
@@ -20,6 +22,12 @@ const allowedOrigins = ["http://localhost:5173"];
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({ origin: allowedOrigins, credentials: true }));
+app.use(fileUpload({
+    useTempFiles: true, // This is needed for Cloudinary uploads
+    tempFileDir: '/tmp/' // Directory to store temporary files
+}));
+
+
 
 // API endpoints
 app.get("/", (req, res) => {
@@ -29,6 +37,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use("/api/messages", messageRouter);
+app.use("/api/profile", profileRoutes);
 
 // --- Socket.IO Setup ---
 const server = createServer(app);

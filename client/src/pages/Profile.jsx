@@ -1,5 +1,9 @@
-import React, { useState } from "react";
+import React, { useState,useEffect, useContext } from "react";
 import Navbar from "../components/Navbar";
+import { AppContext } from "../context/AppContext";
+import { assets } from "../assets/assets";
+
+import axios from "axios";
 import {
   Mail,
   MapPin,
@@ -12,75 +16,123 @@ import {
 
 const ProfilePage = ({ isOwnProfile = true }) => {
   const [isEditing, setIsEditing] = useState(false);
-
+  const { backendUrl } = useContext(AppContext);
   const [user, setUser] = useState({
-    profilePic: "", // can be URL or base64
-    name: "Alex Johnson",
-    email: "alex.johnson@email.com",
-    college: "MIT - Computer Science",
-    location: "San Francisco, CA",
-    availability: "Available for coding sessions",
-    skills: [
-      "React",
-      "TypeScript",
-      "JavaScript",
-      "Python",
-      "Node.js",
-      "C++",
-      "Machine Learning",
-      "AWS",
-      "Docker",
-      "GraphQL",
-      "MongoDB",
-      "PostgreSQL",
-      "Git",
-      "Kubernetes",
-      "TensorFlow",
-    ],
-    about:
-      "I'm a passionate full-stack developer with 3+ years of experience building scalable web applications. I love collaborating with fellow developers on challenging projects, especially those involving modern JavaScript frameworks and machine learning integration. Always eager to learn new technologies and share knowledge with the coding community. Looking for coding partners who are enthusiastic about clean code, innovative solutions, and building products that make a difference.",
+    profilePic: "",
+    name: "", // Initialize with empty strings
+    email: "",
+    college: "",
+    location: "",
+    availability: "",
+    skills: [], // Initialize with an empty array
+    bio: "",
   });
-
   const [newSkill, setNewSkill] = useState("");
+  const [selectedPic, setSelectedPic] = useState(null);
 
+  // Function to fetch user data
+  const fetchUserData = async () => {
+    try {
+      // Headers are no longer needed due to withCredentials
+      const res = await axios.get(backendUrl + "/api/profile/profile");
+      setUser(res.data.user);
+    } catch (err) {
+      console.error("Failed to fetch user data", err);
+    }
+  };
+
+
+  // useEffect to run fetchUserData when the component mounts
+  useEffect(() => {
+    fetchUserData();
+  }, []); // The empty array [] ensures this runs only once
   const handleChange = (e) => {
     const { name, value } = e.target;
     setUser((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = () => {
-    // API call to save updated profile can be added here
-    setIsEditing(false);
-  };
+  const handleSave = async () => {
+    try {
+      const formData = new FormData();
 
-  const addSkill = () => {
-    if (newSkill.trim() && !user.skills.includes(newSkill.trim())) {
-      setUser((prev) => ({
-        ...prev,
-        skills: [...prev.skills, newSkill.trim()],
-      }));
-      setNewSkill("");
+      // Append all user data
+      for (const key in user) {
+        if (key !== "skills") {
+          // We'll handle skills separately if needed
+          formData.append(key, user[key]);
+        }
+      }
+
+      // Append the new image file if one was selected
+      if (selectedPic) {
+        formData.append("profilePic", selectedPic);
+      }
+      for (const [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`);
+      }
+      const res = await axios.put(
+        backendUrl + "/api/profile/profile",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      setUser(res.data.user);
+      setIsEditing(false);
+    } catch (err) {
+      console.error("Save failed", err);
     }
   };
 
-  const removeSkill = (skill) => {
-    setUser((prev) => ({
-      ...prev,
-      skills: prev.skills.filter((s) => s !== skill),
-    }));
+  const addSkill = async () => {
+    if (newSkill.trim() && !user.skills.includes(newSkill.trim())) {
+      try {
+        const res = await axios.post(backendUrl + "/api/profile/skills", {
+          skill: newSkill.trim(),
+        });
+        setUser((prev) => ({ ...prev, skills: res.data.skills }));
+        setNewSkill("");
+      } catch (err) {
+        console.error("Failed to add skill", err);
+      }
+    }
+  };
+
+  const removeSkill = async (skill) => {
+    try {
+      const res = await axios.delete(
+        backendUrl + `/api/profile/skills/${skill}`
+      );
+      setUser((prev) => ({ ...prev, skills: res.data.skills }));
+    } catch (err) {
+      console.error("Failed to delete skill", err);
+    }
+  };
+
+  const handleProfilePicChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedPic(file);
+      // Create a local preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setUser((prev) => ({ ...prev, profilePic: reader.result }));
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   return (
     <div className="min-h-screen bg-[#F9FAFB] w-full">
-      {/* Navbar */}
       <Navbar />
 
-      {/* Main Content */}
       <main className="pt-28 px-4 sm:px-8 lg:px-16 w-full space-y-10">
-        {/* Profile Card */}
         <div className="bg-white shadow-lg rounded-xl p-6 flex flex-col sm:flex-row items-center sm:items-start gap-6 w-full">
           <img
-            src={user.profilePic || "https://via.placeholder.com/180"}
+            src={user.profilePic || assets.avatar}
             alt="Profile"
             className="w-40 h-40 sm:w-48 sm:h-48 rounded-full object-cover shadow"
           />
@@ -103,7 +155,6 @@ const ProfilePage = ({ isOwnProfile = true }) => {
           </div>
         </div>
 
-        {/* Skills Section */}
         <div className="bg-white shadow-lg rounded-xl p-6 w-full max-h-60 overflow-y-auto">
           <h3 className="text-xl font-semibold text-gray-900 mb-4">Skills</h3>
           <div className="flex flex-wrap gap-3">
@@ -118,13 +169,11 @@ const ProfilePage = ({ isOwnProfile = true }) => {
           </div>
         </div>
 
-        {/* About Section */}
         <div className="bg-white shadow-lg rounded-xl p-6 w-full max-h-60 overflow-y-auto">
           <h3 className="text-xl font-semibold text-gray-900 mb-4">About Me</h3>
           <p className="text-gray-700 leading-relaxed">{user.about}</p>
         </div>
 
-        {/* Edit Profile Button (only for own profile) */}
         {isOwnProfile && (
           <div className="flex justify-center">
             <button
@@ -137,11 +186,9 @@ const ProfilePage = ({ isOwnProfile = true }) => {
         )}
       </main>
 
-      {/* Edit Modal (only for own profile) */}
       {isOwnProfile && isEditing && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-start overflow-y-auto py-20 px-4 sm:px-8">
           <div className="bg-white rounded-xl w-full max-w-2xl p-6 relative shadow-lg">
-            {/* Close Button */}
             <button
               onClick={() => setIsEditing(false)}
               className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition"
@@ -152,10 +199,9 @@ const ProfilePage = ({ isOwnProfile = true }) => {
             <h2 className="text-2xl font-bold mb-6">Edit Profile</h2>
 
             <div className="space-y-4 max-h-[70vh] overflow-y-auto">
-              {/* Profile Picture Upload */}
               <div className="flex flex-col items-center mb-4">
                 <img
-                  src={user.profilePic || "https://via.placeholder.com/180"}
+                  src={user.profilePic ||assets.avatar}
                   alt="Profile"
                   className="w-40 h-40 sm:w-48 sm:h-48 rounded-full object-cover shadow mb-2"
                 />
@@ -165,24 +211,11 @@ const ProfilePage = ({ isOwnProfile = true }) => {
                     type="file"
                     accept="image/*"
                     className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files[0];
-                      if (file) {
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                          setUser((prev) => ({
-                            ...prev,
-                            profilePic: reader.result,
-                          }));
-                        };
-                        reader.readAsDataURL(file);
-                      }
-                    }}
+                    onChange={handleProfilePicChange}
                   />
                 </label>
               </div>
 
-              {/* Basic Info */}
               {["name", "email", "college", "location", "availability"].map(
                 (field) => (
                   <div key={field}>
@@ -200,7 +233,6 @@ const ProfilePage = ({ isOwnProfile = true }) => {
                 )
               )}
 
-              {/* Skills Section with tag chips */}
               <div>
                 <label className="block text-gray-700 font-medium mb-2">
                   Skills
@@ -245,7 +277,6 @@ const ProfilePage = ({ isOwnProfile = true }) => {
                 </div>
               </div>
 
-              {/* About */}
               <div>
                 <label className="block text-gray-700 font-medium mb-1">
                   About Me
@@ -260,7 +291,6 @@ const ProfilePage = ({ isOwnProfile = true }) => {
               </div>
             </div>
 
-            {/* Save Button */}
             <div className="flex justify-end mt-6 gap-3">
               <button
                 onClick={() => setIsEditing(false)}

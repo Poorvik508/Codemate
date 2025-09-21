@@ -14,7 +14,10 @@ export default function Navbar() {
 
       {/* Right: Icons with labels */}
       <div className="flex items-center space-x-6">
-        <button className="flex items-center gap-2 p-2 rounded-full hover:bg-gray-100 transition">
+        <button
+          onClick={() => navigate("/messages")}
+          className="flex items-center gap-2 p-2 rounded-full hover:bg-gray-100 transition"
+        >
           <MessageCircle size={24} className="text-[#111827]" />
           <span className="text-[#111827] font-medium hidden sm:inline">
             Message
