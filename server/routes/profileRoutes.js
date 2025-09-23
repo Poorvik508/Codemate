@@ -126,19 +126,23 @@ router.post("/skills", userAuth, async (req, res) => {
 
 // Delete skill
 router.delete("/skills/:skill", userAuth, async (req, res) => {
-  try {
+  try {
     const { skill } = req.params;
+    console.log("deleted skill", { skill })
 
-    const user = await User.findById(req.userId);
-    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+    const user = await User.findById(req.userId);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-    user.skills = user.skills.filter((s) => s.name.toLowerCase() !== skill.toLowerCase());
-    await user.save();
+    user.skills = user.skills.filter((s) => s.name.toLowerCase() !== skill.toLowerCase());
+    await user.save();
 
-    res.json({ success: true, skills: user.skills });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
+    // Corrected line: Map to return only the skill names
+    const skillsWithoutVectors = user.skills.map(s => s.name);
+
+    res.json({ success: true, skills: skillsWithoutVectors });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
 });
 
 export default router;
