@@ -7,6 +7,8 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import connnectDB from "./config/mongodb.js";
 import authRouter from "./routes/authRoutes.js";
+
+import chatbotRoute from "./routes/chatbotRoutes.js";
 import userRouter from "./routes/userRoutes.js";
 import messageRouter from "./routes/messageRoutes.js";
 import profileRoutes from "./routes/profileRoutes.js"
@@ -38,6 +40,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use("/api/messages", messageRouter);
 app.use("/api/profile", profileRoutes);
+app.use("/api/chatbot", chatbotRoute );
 
 // --- Socket.IO Setup ---
 const server = createServer(app);

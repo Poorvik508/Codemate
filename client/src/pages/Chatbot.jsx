@@ -1,11 +1,18 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Send } from "lucide-react"; // ✅ Lucide Send icon
+import React, { useState, useRef, useEffect, useContext } from "react";
 import Navbar from "../components/Navbar";
+import { AppContext } from "../context/AppContext";
+import { assets } from "../assets/assets";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { Send } from "lucide-react";
+
 export default function ChatbotPage() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const chatEndRef = useRef(null);
+  const { backendUrl } = useContext(AppContext);
+  const navigate = useNavigate();
 
   const suggestedPrompts = [
     "Find me a React developer in Bangalore",
@@ -17,29 +24,58 @@ export default function ChatbotPage() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim()) return;
+
+    // Add the user's message to state
     const userMessage = { sender: "user", text: input };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
-
-    // simulate bot response
     setIsTyping(true);
-    setTimeout(() => {
-      setIsTyping(false);
+
+    try {
+      const response = await axios.post(backendUrl + "/api/chatbot/ask", {
+        message: input,
+      });
+
+      const { botResponse, matches } = response.data;
+
+      // Add the bot's response to state. The response object now includes a 'matches' array.
       setMessages((prev) => [
         ...prev,
         {
           sender: "bot",
-          text: "🤖 Codemate AI: I found a coding partner for you!",
+          text: botResponse,
+          matches: matches,
         },
       ]);
-    }, 1500);
+    } catch (err) {
+      console.error("Chatbot API error:", err);
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: "bot",
+          text: "Sorry, I'm having trouble connecting right now. Please try again later.",
+        },
+      ]);
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
+  const handlePromptClick = (prompt) => {
+    setInput(prompt);
+    handleSend();
+  };
+
+  const navigateToMatchesPage = (fullMatches) => {
+    // Navigate to a new route and pass the matches in the state
+    navigate("/matches", { state: { matches: fullMatches } });
   };
 
   return (
     <>
-      <Navbar/>
+      <Navbar />
       <div className="pt-[72px] h-screen bg-[#F9FAFB] flex flex-col w-full">
         {/* Chat container FULLSCREEN */}
         <div className="flex-1 flex flex-col w-full h-full bg-white shadow-inner">
@@ -70,6 +106,64 @@ export default function ChatbotPage() {
                       }`}
                     >
                       {msg.text}
+
+                      {/* Conditional rendering for matches */}
+                      {msg.matches && msg.matches.length > 0 && (
+                        <div className="mt-4 space-y-3">
+                          <p className="text-gray-700 font-semibold">
+                            Here are some matches for you:
+                          </p>
+                          {msg.matches.slice(0, 3).map((match, matchIndex) => (
+                            <div
+                              key={matchIndex}
+                              className="bg-white shadow rounded-lg p-3 flex items-center justify-between gap-3"
+                            >
+                              <div className="flex items-center gap-3">
+                                <img
+                                  src={match.user.profilePic || assets.avatar}
+                                  alt={match.user.name}
+                                  className="w-12 h-12 rounded-full object-cover"
+                                />
+                                <div className="flex-1">
+                                  <p className="font-semibold text-gray-900">
+                                    {match.user.name}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex gap-2">
+                                <button
+                                  className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition"
+                                  onClick={() => navigateToMatchesPage([match])}
+                                >
+                                  View Profile
+                                </button>
+                                <button
+                                  className="px-3 py-1 text-sm bg-teal-500 text-white rounded-full hover:bg-teal-600 transition"
+                                  onClick={() =>
+                                    alert(
+                                      "Message functionality is not yet implemented."
+                                    )
+                                  }
+                                >
+                                  Message
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                          {msg.matches.length > 3 && (
+                            <div className="text-center mt-4">
+                              <button
+                                className="text-teal-600 hover:text-teal-800 font-medium transition"
+                                onClick={() =>
+                                  navigateToMatchesPage(msg.matches)
+                                }
+                              >
+                                See more matches ({msg.matches.length - 3})
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -87,14 +181,13 @@ export default function ChatbotPage() {
             )}
           </div>
 
-          {/* Suggested Prompts */}
           {messages.length === 0 && (
             <div className="flex gap-2 p-3 border-t bg-gray-50 overflow-x-auto">
               {suggestedPrompts.map((prompt, idx) => (
                 <button
                   key={idx}
                   className="px-3 py-1 text-sm bg-[#F9FAFB] border rounded-full hover:bg-gray-100 text-[#111827] whitespace-nowrap"
-                  onClick={() => setInput(prompt)}
+                  onClick={() => handlePromptClick(prompt)}
                 >
                   {prompt}
                 </button>
