@@ -33,10 +33,10 @@ export const register = async (req, res) => {
          //IDEA:sending welcome email
 
          const mailOptions = {
-            from:"poorvikp94@gmail.com",
+            from:process.env.SENDER_EMAIL,
             to: email,
-            subject: "welcome to authentication-system",
-            text:`welcome to  authenticaion system .Your account has been created with email id:${email}`
+            subject: "welcome to Codemate",
+            text:`welcome to  Codemate .Your account has been created with email id:${email}`
         }
         try {
             
@@ -129,7 +129,7 @@ export const sendVerifyOtp = async (req, res) => {
     await user.save();
 
     const mailOptions = {
-      from: "poorvikp94@gmail.com",
+      from: process.env.SENDER_EMAIL,
       to: user.email,
       subject: "Account Verification OTP",
         // text: `Your OTP is ${otp}. Verify your account using this OTP`,
@@ -217,7 +217,7 @@ export const sendResetOtp = async (req,res) => {
 
         await user.save();
         const mailOptions = {
-            from:"poorvikp94@gmail.com",
+            from:process.env.SENDER_EMAIL,
             to: user.email,
             subject: "Password Reset OTP",
             // text:`Your OTP is ${otp}. Reset your Password using this OTP`
