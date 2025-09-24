@@ -1,9 +1,10 @@
-// src/components/ConversationList.jsx
 import React from "react";
+import { assets } from "../assets/assets";
 
 function ConversationItem({ conv, active, onClick }) {
   const partner = conv.partner || {};
   const last = conv.lastMessage || {};
+
   return (
     <div
       onClick={() => onClick(conv._id)}
@@ -12,15 +13,11 @@ function ConversationItem({ conv, active, onClick }) {
       }`}
     >
       {/* avatar */}
-      <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-sm text-gray-700">
-        {partner.name
-          ? partner.name
-              .split(" ")
-              .map((n) => n[0])
-              .slice(0, 2)
-              .join("")
-          : "U"}
-      </div>
+      <img
+        src={partner.profilePic || assets.avatar}
+        alt={partner.name}
+        className="w-10 h-10 rounded-full object-cover"
+      />
 
       <div className="flex-1">
         <div className="flex justify-between items-center">
@@ -40,12 +37,6 @@ function ConversationItem({ conv, active, onClick }) {
           {last.text || "No messages yet."}
         </div>
       </div>
-
-      {conv.unreadCount > 0 && (
-        <div className="ml-2 bg-[#14B8A6] text-white text-xs px-2 py-0.5 rounded-full">
-          {conv.unreadCount}
-        </div>
-      )}
     </div>
   );
 }

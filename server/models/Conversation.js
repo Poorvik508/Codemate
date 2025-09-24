@@ -1,18 +1,16 @@
-// server/models/Conversation.js
 import mongoose from "mongoose";
 
 const Schema = mongoose.Schema;
 
 const ConversationSchema = new Schema(
   {
-    participants: [{ type: String, required: true }], // user IDs
+    participants: [{ type: Schema.Types.ObjectId, ref: "User", required: true }],
     lastMessage: {
       text: String,
-      senderId: String,
+      senderId: { type: Schema.Types.ObjectId, ref: "User" },
       createdAt: { type: Date, default: Date.now },
     },
     unreadCounts: {
-      // track unread per participant
       type: Map,
       of: Number,
       default: {},

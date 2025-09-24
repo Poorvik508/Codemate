@@ -27,6 +27,7 @@ export default function ChatbotPage() {
   const handleSend = async () => {
     if (!input.trim()) return;
 
+    // Add the user's message to state
     const userMessage = { sender: "user", text: input };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
@@ -70,9 +71,25 @@ export default function ChatbotPage() {
     navigate("/matches", { state: { matches: fullMatches } });
   };
 
-  // This is the new function to navigate to a specific profile
   const navigateToProfile = (userId) => {
     navigate(`/profile/${userId}`);
+  };
+
+  const handleMessageUser = async (recipientId) => {
+    try {
+      // API call to create or retrieve a conversation
+      const response = await axios.post(
+        `${backendUrl}/api/messages/conversations`,
+        { recipientId }
+      );
+      const conversationId = response.data.conversationId;
+
+      // Navigate to the messages page for the new or existing conversation
+      navigate(`/messages/${conversationId}`);
+    } catch (err) {
+      console.error("Failed to start conversation", err);
+      alert("Failed to start conversation. Please try again.");
+    }
   };
 
   return (
@@ -144,9 +161,7 @@ export default function ChatbotPage() {
                                 <button
                                   className="px-3 py-1 text-sm bg-teal-500 text-white rounded-full hover:bg-teal-600 transition"
                                   onClick={() =>
-                                    alert(
-                                      "Message functionality is not yet implemented."
-                                    )
+                                    handleMessageUser(match.user.id)
                                   }
                                 >
                                   Message
@@ -171,6 +186,7 @@ export default function ChatbotPage() {
                     </div>
                   </div>
                 ))}
+
                 {isTyping && (
                   <div className="flex justify-start items-center gap-2 text-gray-500 text-sm">
                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
@@ -183,6 +199,7 @@ export default function ChatbotPage() {
               </>
             )}
           </div>
+
           {messages.length === 0 && (
             <div className="flex gap-2 p-3 border-t bg-gray-50 overflow-x-auto">
               {suggestedPrompts.map((prompt, idx) => (
@@ -196,6 +213,7 @@ export default function ChatbotPage() {
               ))}
             </div>
           )}
+
           {/* Input Bar */}
           <div className="p-4 border-t flex items-center gap-2 bg-white">
             <input
