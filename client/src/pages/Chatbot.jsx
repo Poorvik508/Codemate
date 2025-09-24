@@ -27,7 +27,6 @@ export default function ChatbotPage() {
   const handleSend = async () => {
     if (!input.trim()) return;
 
-    // Add the user's message to state
     const userMessage = { sender: "user", text: input };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
@@ -40,7 +39,6 @@ export default function ChatbotPage() {
 
       const { botResponse, matches } = response.data;
 
-      // Add the bot's response to state. The response object now includes a 'matches' array.
       setMessages((prev) => [
         ...prev,
         {
@@ -69,8 +67,12 @@ export default function ChatbotPage() {
   };
 
   const navigateToMatchesPage = (fullMatches) => {
-    // Navigate to a new route and pass the matches in the state
     navigate("/matches", { state: { matches: fullMatches } });
+  };
+
+  // This is the new function to navigate to a specific profile
+  const navigateToProfile = (userId) => {
+    navigate(`/profile/${userId}`);
   };
 
   return (
@@ -133,7 +135,9 @@ export default function ChatbotPage() {
                               <div className="flex gap-2">
                                 <button
                                   className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition"
-                                  onClick={() => navigateToMatchesPage([match])}
+                                  onClick={() =>
+                                    navigateToProfile(match.user.id)
+                                  }
                                 >
                                   View Profile
                                 </button>
@@ -167,7 +171,6 @@ export default function ChatbotPage() {
                     </div>
                   </div>
                 ))}
-
                 {isTyping && (
                   <div className="flex justify-start items-center gap-2 text-gray-500 text-sm">
                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
@@ -180,7 +183,6 @@ export default function ChatbotPage() {
               </>
             )}
           </div>
-
           {messages.length === 0 && (
             <div className="flex gap-2 p-3 border-t bg-gray-50 overflow-x-auto">
               {suggestedPrompts.map((prompt, idx) => (
@@ -194,7 +196,6 @@ export default function ChatbotPage() {
               ))}
             </div>
           )}
-
           {/* Input Bar */}
           <div className="p-4 border-t flex items-center gap-2 bg-white">
             <input

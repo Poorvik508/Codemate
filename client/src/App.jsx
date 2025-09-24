@@ -15,19 +15,17 @@ const App = () => {
     <div>
       <ToastContainer />
       <Routes>
-
-        <Route path="/chat-bot" element={<ChatbotPage/> } />
-        <Route path="/profile" element={<Profile/> } />
-        <Route path="/" element={<Landingpage/> } />
-        <Route path="/login" element={<Login/> } />
-        <Route path="/reset-password" element={<ResetPassword/> } />
-        <Route path="/matches" element={<MatchesPage/> } />
-        <Route path="/messages" element={<Messages/> } />
-        
-       
+        <Route path="/chat-bot" element={<ChatbotPage />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/" element={<Landingpage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/matches" element={<MatchesPage />} />
+        <Route path="/messages" element={<Messages />} />
+        <Route path="/profile/:id" element={<Profile />} />
       </Routes>
     </div>
-  )
+  );
 }
 
 export default App

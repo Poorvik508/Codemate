@@ -3,26 +3,32 @@ import axios from "axios";
 import cloudinary from "../utilities/cloudnary.js";
 export const getProfileData = async (req, res) => {
     try {
-        const user = await User.findById(req.userId)
+        // Check for a user ID in the query parameters first
+        const requestedUserId = req.query.userId || req.userId;
+
+        if (!requestedUserId) {
+            return res.status(400).json({ success: false, message: "User ID is required" });
+        }
+
+        const user = await User.findById(requestedUserId)
             .select("name email college location availability bio profilePic skills");
 
         if (!user) {
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
-        // Convert the Mongoose document to a plain object
         const userObject = user.toObject();
 
-        // Transform the skills array to only include the skill names
         if (userObject.skills) {
             userObject.skills = userObject.skills.map(skill => skill.name);
         }
-    
+
         res.json({ success: true, user: userObject });
     } catch (err) {
+        console.error("Failed to get profile data:", err);
         res.status(500).json({ success: false, message: err.message });
     }
-}
+};
 export const updateProfile=async (req, res) => {
   try {
       const userId = req.userId;
