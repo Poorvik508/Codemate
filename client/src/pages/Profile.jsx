@@ -30,7 +30,9 @@ const ProfilePage = () => {
       const url = userId
         ? backendUrl + `/api/profile/profile?userId=${userId}`
         : backendUrl + `/api/profile/profile`;
+  
       const res = await axios.get(url);
+      
       setUser(res.data.user);
     } catch (err) {
       console.error("Failed to fetch user data", err);

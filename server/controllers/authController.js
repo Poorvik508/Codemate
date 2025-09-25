@@ -5,6 +5,7 @@ import transporter from "../config/nodemailer.js";
 import { EMAIL_VERIFY_TEMPLATE, PASSWORD_RESET_TEMPLATE } from"../config/emailTemplates.js";
 export const register = async (req, res) => {
     const { name, email, password } = req.body;
+    console.log({ name, email, password });
     if (!name || !email || !password)
     {
         return res.json({ success:false,message:"missing Details"})
@@ -32,20 +33,20 @@ export const register = async (req, res) => {
         })
          //IDEA:sending welcome email
 
-         const mailOptions = {
-            from:process.env.SENDER_EMAIL,
-            to: email,
-            subject: "welcome to Codemate",
-            text:`welcome to  Codemate .Your account has been created with email id:${email}`
-        }
-        try {
+        //  const mailOptions = {
+        //     from:process.env.SENDER_EMAIL,
+        //     to: email,
+        //     subject: "welcome to Codemate",
+        //     text:`welcome to  Codemate .Your account has been created with email id:${email}`
+        // }
+        // try {
             
-            await transporter.sendMail(mailOptions);
-            console.log("email sent")
-        } catch (error)
-        {
-            console.log("email failed:",error.message)
-        }
+        //     await transporter.sendMail(mailOptions);
+        //     console.log("email sent")
+        // } catch (error)
+        // {
+        //     console.log("email failed:",error.message)
+        // }
         
         return res.json({success:true})
     } catch (error)
@@ -55,6 +56,7 @@ export const register = async (req, res) => {
 }
 export const login = async(req, res) =>{
     const { email, password } = req.body;
+    console.log({ email, password })
     if (!email || !password)
     {
         return res.json({success:false,message:"email and password are required"})
@@ -128,28 +130,28 @@ export const sendVerifyOtp = async (req, res) => {
     user.verifyOtpExpireAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
     await user.save();
 
-    const mailOptions = {
-      from: process.env.SENDER_EMAIL,
-      to: user.email,
-      subject: "Account Verification OTP",
-        // text: `Your OTP is ${otp}. Verify your account using this OTP`,
-      html:EMAIL_VERIFY_TEMPLATE.replace("{{otp}}",otp).replace("{{email}}",user.email)
-    };
+    // const mailOptions = {
+    //   from: process.env.SENDER_EMAIL,
+    //   to: user.email,
+    //   subject: "Account Verification OTP",
+    //     // text: `Your OTP is ${otp}. Verify your account using this OTP`,
+    //   html:EMAIL_VERIFY_TEMPLATE.replace("{{otp}}",otp).replace("{{email}}",user.email)
+    // };
 
-    try {
-      await transporter.sendMail(mailOptions);
-      console.log("OTP sent");
-      res.json({
-        success: true,
-        message: "Verification OTP sent to your email",
-      });
-    } catch (error) {
-      console.log("OTP failed:", error.message);
-      res.json({
-        success: false,
-        message: "Failed to send OTP email",
-      });
-    }
+    // try {
+    //   await transporter.sendMail(mailOptions);
+    //   console.log("OTP sent");
+    //   res.json({
+    //     success: true,
+    //     message: "Verification OTP sent to your email",
+    //   });
+    // } catch (error) {
+    //   console.log("OTP failed:", error.message);
+    //   res.json({
+    //     success: false,
+    //     message: "Failed to send OTP email",
+    //   });
+    // }
   } catch (error) {
     res.json({ success: false, message: error.message });
   }

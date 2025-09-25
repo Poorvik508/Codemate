@@ -18,8 +18,10 @@ const app = express();
 const port = process.env.PORT || 4000;
 
 connnectDB();
-
-const allowedOrigins = ["http://localhost:5173","https://codemate-gray.vercel.app"];
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://codemate-gray.vercel.app"
+];
 
 app.use(express.json());
 app.use(cookieParser());
