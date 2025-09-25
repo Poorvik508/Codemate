@@ -189,16 +189,29 @@ export const verifyEmail = async (req,res) => {
     }
 
 }
-export const isAuthenticated = async (req,res) => {
+export const isAuthenticated = async (req, res) => {
     try {
-          
-        return res.json({success:true})
+        const { token } = req.cookies;
 
-    } catch (error)
-    {
-        res.json({ success: false, message: error.message });
+        if (!token) {
+            // No token found, so the user is not authenticated
+            return res.json({ success: false, message: 'Not Authorized. Login Again' });
+        }
+
+        const tokenDecode = jwt.verify(token, process.env.JWT_SECRET);
+        
+        // If the token is valid and contains an ID, the user is authenticated
+        if (tokenDecode.id) {
+            return res.json({ success: true, message: 'Authenticated' });
+        } else {
+            // Token is invalid or malformed
+            return res.json({ success: false, message: 'Not Authorized. Login Again' });
+        }
+    } catch (error) {
+        // Token verification failed (e.g., token expired or tampered with)
+        res.json({ success: false, message: 'Not Authorized. Login Again' });
     }
-}
+};
 
 export const sendResetOtp = async (req,res) => {
     const { email } = req.body;
