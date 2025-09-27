@@ -4,10 +4,10 @@ const Schema = mongoose.Schema;
 
 const ConversationSchema = new Schema(
   {
-    participants: [{ type: Schema.Types.ObjectId, ref: "User", required: true }],
+    participants: [{ type: Schema.Types.ObjectId, ref: "user", required: true }],
     lastMessage: {
       text: String,
-      senderId: { type: Schema.Types.ObjectId, ref: "User" },
+      senderId: { type: Schema.Types.ObjectId, ref: "user" },
       createdAt: { type: Date, default: Date.now },
     },
     unreadCounts: {
