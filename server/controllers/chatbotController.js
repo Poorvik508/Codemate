@@ -114,7 +114,7 @@ export const chatbotResponse= async (req, res) => {
     res.json({ success: true, botResponse: responseText, matches: topMatches });
 
   } catch (err) {
-    console.error("Chatbot API Error:", err.response?.data || err.message);
+    // console.error("Chatbot API Error:", err.response?.data || err.message);
     res.status(500).json({ success: false, message: "Failed to get chatbot response." });
   }
 }

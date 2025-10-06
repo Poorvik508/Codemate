@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Code, Brain, Users, MessageSquare, Zap, Shield } from "lucide-react";
+import { Brain, Users, MessageSquare, Zap, Shield, Code } from "lucide-react"; // Added Code icon back to import
 
 const Index = () => {
   return (
@@ -26,7 +26,8 @@ const Index = () => {
               </Button>
             </Link>
             <Link to="/ai-chat">
-              <Button size="lg" variant="outline" className="border-blue-300 text-blue-100 hover:bg-blue-100 hover:text-blue-900 text-lg px-8 py-3">
+              {/* MODIFIED: Changed button style for better contrast and readability */}
+              <Button size="lg" variant="secondary" className="bg-white text-primary hover:bg-white/90 text-lg px-8 py-3">
                 Try AI Matching
               </Button>
             </Link>
@@ -35,7 +36,7 @@ const Index = () => {
         
         {/* Floating Code Elements */}
         <div className="absolute top-20 left-10 text-blue-300 text-6xl opacity-20 animate-float">&lt;/&gt;</div>
-        <div className="absolute bottom-20 right-10 text-purple-300 text-4xl opacity-20 animate-float" style={{animationDelay: '1s'}}>{ }</div>
+        <div className="absolute bottom-20 right-10 text-purple-300 text-4xl opacity-20 animate-float" style={{animationDelay: '1s'}}>{'{ }'}</div>
         <div className="absolute top-1/2 right-20 text-cyan-300 text-5xl opacity-20 animate-float" style={{animationDelay: '2s'}}>( )</div>
       </section>
 

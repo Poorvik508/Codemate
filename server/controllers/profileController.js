@@ -25,7 +25,7 @@ export const getProfileData = async (req, res) => {
 
         res.json({ success: true, user: userObject });
     } catch (err) {
-        console.error("Failed to get profile data:", err);
+        // console.error("Failed to get profile data:", err);
         res.status(500).json({ success: false, message: err.message });
     }
 };
@@ -35,7 +35,7 @@ export const updateProfile=async (req, res) => {
       const { name, email, college, location, availability, bio } = req.body;
     
     // This is the correct way to print the bio to the console
-    console.log("Received Bio:", bio)
+    // console.log("Received Bio:", bio)
 
     const updateFields = {};
     const allowedFields = ['name', 'email', 'college', 'location', 'availability', 'bio'];
@@ -77,7 +77,7 @@ export const updateProfile=async (req, res) => {
 
     res.json({ success: true, user: userObject });
   } catch (err) {
-    console.error("Profile update failed:", err.message);
+//     console.error("Profile update failed:", err.message);
     res.status(500).json({ success: false, message: "Failed to update profile." });
   }
 }
@@ -117,14 +117,14 @@ export const addSkill=async (req, res) => {
 
     res.json({ success: true, skills: skillsWithoutVectors });
   } catch (err) {
-    console.error("Gemini API error:", err.response?.data || err.message);
+    // console.error("Gemini API error:", err.response?.data || err.message);
     res.status(500).json({ success: false, message: "Failed to add skill" });
   }
 }
 export const deleteSkill= async (req, res) => {
   try {
     const { skill } = req.params;
-    console.log("deleted skill", { skill })
+    // console.log("deleted skill", { skill })
 
     const user = await User.findById(req.userId);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });

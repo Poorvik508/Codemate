@@ -146,7 +146,7 @@ export const getDiscoverFeed = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Failed to generate discover feed:", error);
+    // console.error("Failed to generate discover feed:", error);
     res.status(500).json({ success: false, message: "Server error while generating feed." });
   }
 };
@@ -198,7 +198,7 @@ export const filterUsers = async (req, res) => {
         res.json({ success: true, results: formattedResults });
 
     } catch (error) {
-        console.error("Failed to filter users:", error);
+        // console.error("Failed to filter users:", error);
         res.status(500).json({ success: false, message: "Server error during filter." });
     }
 };

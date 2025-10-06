@@ -147,7 +147,7 @@ export const createConversation = async (req, res) => {
 
     res.status(200).json({ conversationId: conversation._id });
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     res.status(500).json({ error: "Failed to create conversation" });
   }
 };
@@ -192,7 +192,7 @@ export const getConversations = async (req, res) => {
 
     res.json({ conversations: formattedConversations });
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     res.status(500).json({ error: "Failed to fetch conversations" });
   }
 };
@@ -207,7 +207,7 @@ export const getMessages = async (req, res) => {
 
     res.json(messages);
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     res.status(500).json({ error: "Failed to fetch messages" });
   }
 };
@@ -231,7 +231,7 @@ export const sendMessage = async (req, res) => {
 
     res.json(newMessage);
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     res.status(500).json({ error: "Failed to send message" });
   }
 };

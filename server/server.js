@@ -21,7 +21,9 @@ connnectDB();
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:8081",
-  "https://codemate-gray.vercel.app"
+  "https://codemate-gray.vercel.app",
+  "https://codemate-lsv3cbn19-poorviks-projects.vercel.app"
+
 ];
 
 app.use(express.json());
@@ -56,12 +58,12 @@ const io = new Server(server, {
 });
 
 io.on("connection", (socket) => {
-  console.log("⚡ New client connected:", socket.id);
+  // console.log("⚡ New client connected:", socket.id);
 
   // Join conversation room
   socket.on("join_conversation", (conversationId) => {
     socket.join(conversationId);
-    console.log(`User joined conversation ${conversationId}`);
+    // console.log(`User joined conversation ${conversationId}`);
   });
 
   // Send message
@@ -79,10 +81,10 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log("Client disconnected:", socket.id);
+    // console.log("Client disconnected:", socket.id);
   });
 });
 
 server.listen(port, () => {
-  console.log(`🚀 Server started on port: ${port}`);
+  // console.log(`🚀 Server started on port: ${port}`);
 });
