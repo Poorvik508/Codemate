@@ -20,6 +20,7 @@ const port = process.env.PORT || 4000;
 connnectDB();
 const allowedOrigins = [
   "http://localhost:5173",
+  "http://localhost:8081",
   "https://codemate-gray.vercel.app"
 ];
 
@@ -39,7 +40,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", authRouter);
-app.use("/api/user", userRouter);
+app.use("/api/users", userRouter);
 app.use("/api/messages", messageRouter);
 app.use("/api/profile", profileRoutes);
 app.use("/api/chatbot", chatbotRoute );
