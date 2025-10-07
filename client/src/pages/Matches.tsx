@@ -1,20 +1,16 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { backendUrl } from "@/config/backendUrl";
-import { Link, useNavigate } from "react-router-dom";
+import { UserCarousel } from "@/components/UserCarousel";
+import { MatchCard } from "@/components/MatchCard";
 
 // --- UI Components ---
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageSquare, MapPin, Clock, Search, Loader2, User } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Search, Loader2 } from "lucide-react";
 import { Label } from "@/components/ui/label"; 
-import { useToast } from "@/hooks/use-toast";
 
-// A custom hook for debouncing text input
 const useDebounce = (value: string, delay: number) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
   useEffect(() => {
@@ -25,20 +21,15 @@ const useDebounce = (value: string, delay: number) => {
 };
 
 const Matches = () => {
-  const navigate = useNavigate();
-
-  // State for the default recommendation feed
   const [feed, setFeed] = useState<Record<string, any[]> | null>(null);
   const [isLoadingFeed, setIsLoadingFeed] = useState(true);
 
-  // State for all filters
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [availability, setAvailability] = useState("all");
-  const [filterScope, setFilterScope] = useState("location"); // 'location' or 'college'
+  const [filterScope, setFilterScope] = useState("location");
   const [scopeValue, setScopeValue] = useState("");
   
-  // State for search results
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   
@@ -47,10 +38,9 @@ const Matches = () => {
 
   const isFiltering = searchTerm || availability !== "all" || scopeValue;
 
-  // Effect to fetch the default recommendation feed
   useEffect(() => {
-    setIsLoadingFeed(true);
     const fetchFeed = async () => {
+      setIsLoadingFeed(true);
       try {
         const res = await axios.get(`${backendUrl}/api/users/discover-feed`);
         if (res.data.success) setFeed(res.data.feed);
@@ -60,13 +50,11 @@ const Matches = () => {
     fetchFeed();
   }, []);
 
-  // Effect to perform a search when any filter changes
   useEffect(() => {
     if (!isFiltering) {
       setSearchResults([]);
       return;
     }
-
     const searchUsers = async () => {
       setIsSearching(true);
       try {
@@ -78,51 +66,15 @@ const Matches = () => {
         }
 
         const res = await axios.get(`${backendUrl}/api/users/filter?${params.toString()}`);
-        if (res.data.success) {
-          setSearchResults(res.data.results);
-        }
+        if (res.data.success) setSearchResults(res.data.results);
       } catch (error) { console.error("Failed to search users", error); } 
       finally { setIsSearching(false); }
     };
     searchUsers();
   }, [debouncedSearchTerm, availability, filterScope, debouncedScopeValue, isFiltering]);
   
-  const getInitials = (name: string = "") => {
-    const names = name.split(' ');
-    if (names.length > 1 && names[1]) return `${names[0][0]}${names[1][0]}`.toUpperCase();
-    return name.substring(0, 2).toUpperCase();
-  };
-
-  const renderUserCard = (user: any) => (
-    <Card key={user._id} className="gradient-card border-border/50 flex flex-col">
-      <CardHeader className="items-center text-center">
-        <Avatar className="h-20 w-20 mb-4"><AvatarImage src={user.profilePic} /><AvatarFallback>{getInitials(user.name)}</AvatarFallback></Avatar>
-        <CardTitle className="text-lg">{user.name}</CardTitle>
-      </CardHeader>
-      <CardContent className="flex-1 space-y-4">
-        <div className="space-y-2 text-sm text-muted-foreground">
-            <div className="flex items-center"><MapPin className="h-4 w-4 mr-2 shrink-0" /> <span className="truncate">{user.location || 'Not specified'}</span></div>
-            <div className="flex items-center"><Clock className="h-4 w-4 mr-2 shrink-0" /> <span className="capitalize">{user.availability || 'Not specified'}</span></div>
-        </div>
-        <div>
-            <p className="text-sm font-medium mb-2">Top Skills:</p>
-            <div className="flex flex-wrap gap-1">
-                {(user.skills || []).slice(0, 3).map((skill: string, index: number) => <Badge key={index} variant="secondary">{skill}</Badge>)}
-                {(user.skills || []).length > 3 && <Badge variant="outline">+{user.skills.length - 3} more</Badge>}
-            </div>
-        </div>
-        <div className="flex gap-2 pt-2">
-            <Link to={`/profile/${user._id}`} className="flex-1"><Button variant="outline" size="sm" className="w-full"><User className="h-4 w-4 mr-2" />Profile</Button></Link>
-            <Link to={`/messaging/${user._id}`} className="flex-1"><Button size="sm" className="w-full"><MessageSquare className="h-4 w-4 mr-2" />Message</Button></Link>
-        </div>
-      </CardContent>
-    </Card>
-  );
-
   return (
-    // MODIFIED: Removed vertical padding from the main container
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary">
-      {/* MODIFIED: Removed container/max-width and added responsive padding directly */}
       <div className="py-8 px-4 sm:px-6 lg:px-8">
         <div className="mb-8 space-y-2">
             <h1 className="text-3xl font-bold">Discover Partners</h1>
@@ -183,7 +135,11 @@ const Matches = () => {
             searchResults.length > 0 ? (
               <>
                 <h2 className="text-2xl font-bold mb-4">Search Results ({searchResults.length})</h2>
-                <div className="grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">{searchResults.map(renderUserCard)}</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                  {searchResults.map(user => (
+                    <MatchCard key={user._id} match={{ user: user, matchingSkill: user.skills[0] || 'N/A' }} />
+                  ))}
+                </div>
               </>
             ) : <p className="text-center py-20 text-muted-foreground">No users found matching your filters.</p>}
           </div>
@@ -194,13 +150,9 @@ const Matches = () => {
                 <p className="text-center py-20 text-muted-foreground">No recommendations found yet. Make sure your profile is complete!</p>
             ) : feed && Object.keys(feed).map(categoryKey => {
               const users = feed[categoryKey];
-              if (users.length === 0) return null;
               const titleMap: { [key: string]: string } = { bySkill: "Because You Have Similar Skills", byLocation: "Developers Near You", byCollege: "From Your College", byAvailability: "Available When You Are" };
               return (
-                <div key={categoryKey}>
-                  <h2 className="text-2xl font-bold mb-4">{titleMap[categoryKey]}</h2>
-                  <div className="grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">{users.map(renderUserCard)}</div>
-                </div>
+                <UserCarousel key={categoryKey} title={titleMap[categoryKey]} users={users} />
               );
             })}
           </div>

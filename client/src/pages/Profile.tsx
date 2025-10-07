@@ -13,7 +13,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { X, Edit3, Save, Camera, Loader2, ArrowLeft, MessageSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { backendUrl } from "@/config/backendUrl";
-
 // Define a type for the profile data being displayed
 interface UserProfile {
   _id: string;
@@ -145,10 +144,13 @@ const Profile = () => {
     return <div className="flex justify-center items-center h-screen"><Loader2 className="h-8 w-8 animate-spin" /></div>;
   }
 
+  const skillsToDisplay = isMyProfile && isEditing ? skills : profileData.skills;
+
   return (
-    <div className="min-h-screen py-8 px-4 bg-gradient-to-br from-background to-secondary">
-      {/* MODIFIED: Removed max-w-4xl to make the layout full-width */}
-      <div className="container mx-auto">
+    // MODIFIED: Container classes removed for full-width background
+    <div className="min-h-screen bg-gradient-to-br from-background to-secondary">
+      {/* MODIFIED: Inner container added for padding, replacing old container */}
+      <div className="py-8 px-4 sm:px-6 lg:px-8">
         <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
@@ -184,6 +186,7 @@ const Profile = () => {
             </div>
             <div className="p-6 text-center">
               <CardTitle className="text-2xl">{profileData.name}</CardTitle>
+              {isMyProfile && <p className="text-muted-foreground">{profileData.email}</p>}
               {!isMyProfile && (
                 <Link to={`/messaging/${profileData._id}`} className="mt-4 inline-block w-full">
                   <Button className="w-full">
@@ -238,12 +241,14 @@ const Profile = () => {
                   </div>
                 )}
                 <div className="flex flex-wrap gap-2 min-h-[24px]">
-                  {(skills && skills.length > 0) ? skills.map((skill, index) => (
+                  {(skillsToDisplay && skillsToDisplay.length > 0) ? skillsToDisplay.map((skill, index) => (
                     <Badge key={index} variant="secondary" className="text-sm flex items-center gap-1">
                       {skill}
                       {isMyProfile && isEditing && ( <X className="h-3 w-3 cursor-pointer" onClick={() => handleRemoveSkill(skill)} /> )}
                     </Badge>
-                  )) : !isEditing && <p className="text-sm text-muted-foreground">No skills added yet.</p>}
+                  )) : !isEditing && (
+                    <p className="text-sm text-muted-foreground">No skills added yet.</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
