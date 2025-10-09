@@ -4,6 +4,7 @@ import {
   getMessages,
   sendMessage,
   createConversation,
+  markAsRead
 } from "../controllers/messageController.js";
 import userAuth from "../middleware/userauth.js"; // Import auth middleware
 
@@ -20,5 +21,6 @@ router.get("/conversations/:conversationId/messages", userAuth, getMessages);
 
 // Send message
 router.post("/send", userAuth, sendMessage);
+router.post("/conversations/:conversationId/read", userAuth, markAsRead);
 
 export default router;

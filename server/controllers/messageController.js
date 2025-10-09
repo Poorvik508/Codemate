@@ -122,17 +122,22 @@ import Conversation from "../models/Conversation.js";
 import User from "../models/userModel.js";
 import Message from "../models/Message.js";
 
-// Create or get an existing conversation
+// Create or get an existing conversation with another user
 export const createConversation = async (req, res) => {
   try {
-    const userId = req.userId; // Logged-in user is a string
+    const userId = req.userId;
     const { recipientId } = req.body;
 
     if (!recipientId || !userId) {
       return res.status(400).json({ error: "Recipient ID is required" });
     }
+    
+    // Prevent creating a conversation with oneself
+    if (userId.toString() === recipientId.toString()) {
+        return res.status(400).json({ error: "Cannot create a conversation with yourself." });
+    }
 
-    // A more robust way to check for an existing conversation
+    // Find if a conversation already exists between the two participants
     let conversation = await Conversation.findOne({
       participants: { $all: [userId, recipientId] }
     });
@@ -141,29 +146,34 @@ export const createConversation = async (req, res) => {
       // If not, create a new conversation
       conversation = await Conversation.create({
         participants: [userId, recipientId],
-        lastMessage: { text: "Conversation created.", senderId: userId },
+        // Initialize unread counts for both users to 0
+        unreadCounts: {
+            [userId]: 0,
+            [recipientId]: 0,
+        }
       });
     }
 
     res.status(200).json({ conversationId: conversation._id });
   } catch (err) {
-    // console.error(err);
+    console.error("Create Conversation Error:", err);
     res.status(500).json({ error: "Failed to create conversation" });
   }
 };
 
-// Fetch all conversations for logged-in user
+// Fetch all conversations for the logged-in user
 export const getConversations = async (req, res) => {
   try {
     const userId = req.userId;
 
     const conversations = await Conversation.find({
-      participants: userId, // Use the string userId directly in the query
+      participants: userId,
     })
       .populate("participants", "name profilePic online")
       .sort({ updatedAt: -1 });
 
     const formattedConversations = conversations.map((conv) => {
+      // Find the other participant (the "partner") in the conversation
       const partner = conv.participants.find(
         (p) => p._id.toString() !== userId.toString()
       );
@@ -177,7 +187,7 @@ export const getConversations = async (req, res) => {
           }
         : {
             id: "unknown",
-            name: "Unknown",
+            name: "Unknown User",
             profilePic: null,
             online: false,
           };
@@ -187,17 +197,19 @@ export const getConversations = async (req, res) => {
         partner: partnerInfo,
         lastMessage: conv.lastMessage,
         updatedAt: conv.updatedAt,
+        // Get the unread count for the logged-in user
+        unreadCount: conv.unreadCounts.get(userId) || 0,
       };
     });
 
     res.json({ conversations: formattedConversations });
   } catch (err) {
-    // console.error(err);
+    console.error("Get Conversations Error:", err);
     res.status(500).json({ error: "Failed to fetch conversations" });
   }
 };
 
-// Fetch messages for a conversation
+// Fetch all messages for a specific conversation
 export const getMessages = async (req, res) => {
   try {
     const { conversationId } = req.params;
@@ -207,31 +219,68 @@ export const getMessages = async (req, res) => {
 
     res.json(messages);
   } catch (err) {
-    // console.error(err);
+    console.error("Get Messages Error:", err);
     res.status(500).json({ error: "Failed to fetch messages" });
   }
 };
 
-// Send a message
+// Send a new message
 export const sendMessage = async (req, res) => {
   try {
     const { conversationId, text } = req.body;
     const senderId = req.userId;
 
+    if (!conversationId || !text) {
+        return res.status(400).json({ error: "Conversation ID and text are required." });
+    }
+
+    // Create the new message
     const newMessage = await Message.create({
       conversationId,
       senderId,
       text,
     });
 
-    await Conversation.findByIdAndUpdate(conversationId, {
-      lastMessage: { text: text, senderId: senderId },
-      updatedAt: Date.now(),
-    });
+    // Find the conversation to update it
+    const conversation = await Conversation.findById(conversationId);
+    if (conversation) {
+        conversation.lastMessage = { text, senderId, createdAt: new Date() };
+        
+        // Increment the unread count for every other participant in the conversation
+        conversation.participants.forEach(participantId => {
+            if (participantId.toString() !== senderId.toString()) {
+                const currentCount = conversation.unreadCounts.get(participantId.toString()) || 0;
+                conversation.unreadCounts.set(participantId.toString(), currentCount + 1);
+            }
+        });
+        
+        await conversation.save();
+    }
 
-    res.json(newMessage);
+    res.status(201).json(newMessage);
   } catch (err) {
-    // console.error(err);
+    console.error("Send Message Error:", err);
     res.status(500).json({ error: "Failed to send message" });
   }
+};
+
+// Mark a conversation's messages as read for the logged-in user
+export const markAsRead = async (req, res) => {
+    try {
+        const { conversationId } = req.params;
+        const userId = req.userId;
+
+        const conversation = await Conversation.findById(conversationId);
+        
+        // If the conversation exists and has an unread count for the user, reset it to 0
+        if (conversation && conversation.unreadCounts.has(userId)) {
+            conversation.unreadCounts.set(userId, 0);
+            await conversation.save();
+        }
+
+        res.status(200).json({ success: true, message: "Marked as read." });
+    } catch (err) {
+        console.error("Mark as Read Error:", err);
+        res.status(500).json({ error: "Failed to mark as read." });
+    }
 };

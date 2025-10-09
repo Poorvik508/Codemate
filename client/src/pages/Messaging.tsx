@@ -9,7 +9,6 @@ import { backendUrl } from "@/config/backendUrl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Send, Search, Phone, Video, MoreVertical, Loader2, MessageSquare, ArrowLeft, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
@@ -41,12 +40,17 @@ const Messaging = () => {
     if (!user) return;
     socket.current = io(backendUrl || "http://localhost:4000", { withCredentials: true });
 
-    socket.current.on("receive_message", (newMessage: Message) => {
-      if (newMessage.senderId !== user?._id) {
+    const handleReceiveMessage = (newMessage: Message) => {
+      if (newMessage.senderId !== user._id) {
         setConversations(prevConvos => 
           prevConvos.map(c => 
             c._id === newMessage.conversationId 
-            ? { ...c, lastMessage: { text: newMessage.text, senderId: newMessage.senderId }, updatedAt: newMessage.createdAt } 
+            ? { 
+                ...c, 
+                lastMessage: { text: newMessage.text, senderId: newMessage.senderId }, 
+                updatedAt: newMessage.createdAt,
+                unreadCount: c._id === selectedConversationId ? 0 : (c.unreadCount || 0) + 1,
+              } 
             : c
           ).sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
         );
@@ -54,11 +58,13 @@ const Messaging = () => {
           setMessages((prevMessages) => [...prevMessages, newMessage]);
         }
       }
-    });
+    };
+
+    socket.current.on("receive_message", handleReceiveMessage);
 
     return () => {
       socket.current?.disconnect();
-      socket.current?.off("receive_message");
+      socket.current?.off("receive_message", handleReceiveMessage);
     };
   }, [user, backendUrl, selectedConversationId]);
 
@@ -107,9 +113,9 @@ const Messaging = () => {
     }
   }, [recipientIdFromUrl, conversations, user, isLoadingConvos, navigate]);
 
-  // Effect to fetch messages and join socket room when a conversation is selected
+  // Effect to fetch messages, join room, and mark as read
   useEffect(() => {
-    if (!selectedConversationId) {
+    if (!selectedConversationId || !user) {
       setMessages([]);
       return;
     };
@@ -126,7 +132,22 @@ const Messaging = () => {
       }
     };
     fetchMessages();
-  }, [selectedConversationId]);
+
+    const currentConv = conversations.find(c => c._id === selectedConversationId);
+    if (currentConv && currentConv.unreadCount && currentConv.unreadCount > 0) {
+      const markConversationAsRead = async () => {
+        try {
+          setConversations(prev => prev.map(c => 
+            c._id === selectedConversationId ? { ...c, unreadCount: 0 } : c
+          ));
+          await axios.post(`${backendUrl}/api/messages/conversations/${selectedConversationId}/read`);
+        } catch (error) {
+          console.error("Failed to mark as read", error);
+        }
+      };
+      markConversationAsRead();
+    }
+  }, [selectedConversationId, user, conversations]);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -170,21 +191,18 @@ const Messaging = () => {
 
   return (
     <div>
-      {/* Conversation List Panel (Absolutely Positioned) */}
       <div className={`
         absolute top-16 bottom-0 left-0 w-full lg:w-[350px]
         bg-background/80 border-r border-border
         grid grid-rows-[auto_1fr] overflow-hidden
         ${selectedConversationId ? 'hidden lg:grid' : 'grid'}
       `}>
-        {/* Row 1: Search Header */}
         <div className="p-4 border-b">
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input placeholder="Search conversations..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
           </div>
         </div>
-        {/* Row 2: Scrollable List */}
         <div className="overflow-y-auto p-2 space-y-1">
           {isLoadingConvos ? <div className="flex justify-center items-center h-full"><Loader2 className="h-6 w-6 animate-spin"/></div> :
           filteredConversations.length > 0 ? (
@@ -200,9 +218,15 @@ const Messaging = () => {
                     <h4 className="font-medium truncate">{c.partner.name}</h4>
                     <span className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(c.updatedAt), { addSuffix: true })}</span>
                   </div>
-                  <p className="text-sm text-muted-foreground truncate">{c.lastMessage.text}</p>
+                  <div className="flex items-center justify-between mt-1">
+                    <p className="text-sm text-muted-foreground truncate">{c.lastMessage.text}</p>
+                    {c.unreadCount && c.unreadCount > 0 && (
+                      <div className="bg-green-500 text-white text-xs font-bold h-5 w-5 rounded-full flex items-center justify-center shrink-0">
+                        {c.unreadCount}
+                      </div>
+                    )}
+                  </div>
                 </div>
-                {c.unreadCount && c.unreadCount > 0 && <Badge>{c.unreadCount}</Badge>}
               </div>
             ))
           ) : (
@@ -215,7 +239,6 @@ const Messaging = () => {
         </div>
       </div>
 
-      {/* Chat Window Panel (Absolutely Positioned) */}
       <div className={`
         absolute top-16 bottom-0 right-0 left-0 lg:left-[350px]
         bg-muted/20 
@@ -230,7 +253,6 @@ const Messaging = () => {
            </div>
         ) : (
           <div className="h-full w-full grid grid-rows-[auto_1fr_auto] bg-transparent">
-            {/* Row 1: Header */}
             <div className="p-4 border-b border-border flex items-center justify-between bg-background/80">
               <div className="flex items-center gap-3">
                 <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => navigate('/messaging')}>
@@ -252,7 +274,6 @@ const Messaging = () => {
               </div>
             </div>
 
-            {/* Row 2: Scrollable Message Area */}
             <div className="overflow-y-auto p-4">
               <div className="space-y-4">
                 {isLoadingMessages ? <div className="flex justify-center items-center h-full"><Loader2 className="h-6 w-6 animate-spin"/></div> :
@@ -270,7 +291,6 @@ const Messaging = () => {
               </div>
             </div>
             
-            {/* Row 3: Input Footer */}
             <div className="p-4 border-t border-border bg-background/80">
               <div className="flex gap-2">
                 <Input value={messageInput} onChange={(e) => setMessageInput(e.target.value)} onKeyPress={handleKeyPress} placeholder="Type your message..." className="flex-1" />
