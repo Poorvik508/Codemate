@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Brain, Users, MessageSquare, Zap, Shield, Code } from "lucide-react"; // Added Code icon back to import
+import { Brain, Users, MessageSquare, Zap, Shield, Code } from "lucide-react";
 
 const Index = () => {
   return (
@@ -12,7 +12,8 @@ const Index = () => {
           <div className="animate-float">
             <h1 className="text-5xl md:text-7xl font-bold mb-6 text-white">
               Find Your Perfect
-              <span className="block gradient-text">Coding Partner</span>
+              {/* MODIFIED: 'gradient-text' class removed to make text solid white */}
+              <span className="block">Coding Partner</span>
             </h1>
           </div>
           <p className="text-xl md:text-2xl text-blue-100 mb-8 max-w-3xl mx-auto">
@@ -26,7 +27,6 @@ const Index = () => {
               </Button>
             </Link>
             <Link to="/ai-chat">
-              {/* MODIFIED: Changed button style for better contrast and readability */}
               <Button size="lg" variant="secondary" className="bg-white text-primary hover:bg-white/90 text-lg px-8 py-3">
                 Try AI Matching
               </Button>
@@ -39,6 +39,8 @@ const Index = () => {
         <div className="absolute bottom-20 right-10 text-purple-300 text-4xl opacity-20 animate-float" style={{animationDelay: '1s'}}>{'{ }'}</div>
         <div className="absolute top-1/2 right-20 text-cyan-300 text-5xl opacity-20 animate-float" style={{animationDelay: '2s'}}>( )</div>
       </section>
+
+      {/* REMOVED: The 'Meet Some of Our Codemates' section has been removed as requested. */}
 
       {/* Features Section */}
       <section className="py-20 px-4 bg-background">
