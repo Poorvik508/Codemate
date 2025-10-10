@@ -73,23 +73,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MessageSquare, User, Percent, MapPin, Clock } from "lucide-react";
-
-// MODIFIED: Added more fields to the user type
-interface MatchUser {
-  _id: string;
-  name: string;
-  bio?: string;
-  profilePic?: string;
-  location?: string;
-  availability?: string;
-  skills?: string[];
-}
-
-interface Match {
-  user: MatchUser;
-  matchingSkill: string;
-  score?: number; 
-}
+import { Match } from "@/types";
 
 const getInitials = (name: string) => {
     if (!name) return "U";
@@ -117,7 +101,6 @@ export const MatchCard = ({ match }: { match: Match }) => {
         )}
       </CardHeader>
       <CardContent className="flex-1 flex flex-col justify-between space-y-4">
-        {/* MODIFIED: Replaced Bio with Location, Availability, and Skills */}
         <div className="space-y-2 text-sm text-muted-foreground">
             <div className="flex items-center"><MapPin className="h-4 w-4 mr-2 shrink-0" /> <span className="truncate">{match.user.location || 'Not specified'}</span></div>
             <div className="flex items-center"><Clock className="h-4 w-4 mr-2 shrink-0" /> <span className="capitalize">{match.user.availability || 'Not specified'}</span></div>

@@ -3,6 +3,7 @@ import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { backendUrl } from "@/config/backendUrl";
+import { Match, Message } from "@/types";
 
 // --- UI Components ---
 import { Button } from "@/components/ui/button";
@@ -13,11 +14,6 @@ import { Bot, Send, User, Sparkles, Percent, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-
-// --- Interfaces ---
-interface MatchUser { id: string; name: string; bio: string; profilePic?: string; }
-interface Match { user: MatchUser; matchingSkill: string; score: number; }
-interface Message { id: number; content: string; isBot: boolean; timestamp: Date; matches?: Match[]; allMatches?: Match[]; showAllMatchesButton?: boolean; }
 
 const AIChat = () => {
   const { user } = useAuth();
@@ -37,7 +33,7 @@ const AIChat = () => {
       if (storedMessages) {
         return JSON.parse(storedMessages).map((msg: Message) => ({ ...msg, timestamp: new Date(msg.timestamp) }));
       }
-    } catch (error) { console.error("Failed to parse chat history", error); }
+    } catch (error) { console.error("Failed to parse chat history from localStorage", error); }
     return [defaultMessage];
   });
 
@@ -105,7 +101,6 @@ const AIChat = () => {
 
   return (
     <Card className="h-[calc(100vh-4rem)] w-full flex flex-col rounded-none border-0 bg-transparent">
-      {/* MODIFIED: Removed container/mx-auto and added padding directly */}
       <CardHeader className="border-b px-4 sm:px-6">
         <div className="flex justify-between items-center">
           <CardTitle className="flex items-center gap-2">
@@ -121,7 +116,6 @@ const AIChat = () => {
         </div>
       </CardHeader>
       
-      {/* MODIFIED: Removed container/mx-auto to allow content to be full-width */}
       <CardContent className="flex-1 flex flex-col overflow-hidden p-0">
         <div className="flex-1 overflow-y-auto space-y-6 p-4 sm:p-6">
           
@@ -149,21 +143,23 @@ const AIChat = () => {
                   
                   {message.matches && message.matches.length > 0 && (
                     <div className="mt-4 space-y-3">
-                      {message.matches.map((match) => (
-                        <Card key={match.user.id} className="p-3 bg-background/50 text-left">
+                      {message.matches.map((match: Match) => (
+                        <Card key={match.user._id} className="p-3 bg-background/50 text-left">
                           <div className="flex items-start gap-3">
                             <Avatar><AvatarImage src={match.user.profilePic} /><AvatarFallback>{getInitials(match.user.name)}</AvatarFallback></Avatar>
                             <div className="flex-1">
                               <p className="font-bold">{match.user.name}</p>
                               <p className="text-xs text-muted-foreground">Match: <span className="font-semibold text-primary">{match.matchingSkill}</span></p>
                             </div>
-                            <Badge variant="outline" className="border-green-600 text-green-600">
-                                {(match.score * 100).toFixed(0)}%
-                            </Badge>
+                            {match.score && match.score > 0 && (
+                              <Badge variant="outline" className="border-green-600 text-green-600">
+                                  {(match.score * 100).toFixed(0)}%
+                              </Badge>
+                            )}
                           </div>
                           <div className="flex gap-2 mt-3">
-                            <Link to={`/profile/${match.user.id}`} className="flex-1"><Button size="sm" variant="outline" className="w-full">Profile</Button></Link>
-                            <Link to={`/messaging/${match.user.id}`} className="flex-1"><Button size="sm" className="w-full">Message</Button></Link>
+                            <Link to={`/profile/${match.user._id}`} className="flex-1"><Button size="sm" variant="outline" className="w-full">Profile</Button></Link>
+                            <Link to={`/messaging/${match.user._id}`} className="flex-1"><Button size="sm" className="w-full">Message</Button></Link>
                           </div>
                         </Card>
                       ))}

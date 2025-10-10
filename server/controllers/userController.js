@@ -1,8 +1,6 @@
-
-
 import User from "../models/userModel.js";
 import axios from "axios";
-
+import { formatUserForResponse } from "../utilities/formatters.js";
 // --- Helper Functions ---
 
 const calculateCosineSimilarity = (vecA, vecB) => {
@@ -19,22 +17,8 @@ const calculateCosineSimilarity = (vecA, vecB) => {
   return dotProduct / (magnitudeA * magnitudeB);
 };
 
-// CORRECTED: This is now the single source of truth for formatting user data.
-// It includes all necessary fields for the frontend cards.
-const formatUserForResponse = (user) => {
-    if (!user) return null;
-    const userObject = user.toObject ? user.toObject() : user;
-    return {
-        _id: userObject._id,
-        name: userObject.name,
-        profilePic: userObject.profilePic,
-        bio: userObject.bio,
-        location: userObject.location,
-        availability: userObject.availability,
-        college: userObject.college,
-        skills: userObject.skills ? userObject.skills.map(s => s.name || s) : [],
-    };
-};
+// MODIFIED: This helper now includes all the data the frontend needs.
+
 
 
 // --- Controller Functions ---
@@ -48,7 +32,6 @@ export const getDiscoverFeed = async (req, res) => {
       return res.status(404).json({ success: false, message: "User not found" });
     }
     
-    // --- Define the different matching queries ---
     const findBySkill = async () => {
         const allOtherUsers = await User.find({ _id: { $ne: loggedInUserId } });
         const skillMatches = [];
@@ -70,7 +53,7 @@ export const getDiscoverFeed = async (req, res) => {
         return skillMatches
             .sort((a, b) => b.score - a.score)
             .slice(0, 10)
-            .map(match => formatUserForResponse(match.user)); // MODIFIED: Use the correct helper
+            .map(match => formatUserForResponse(match.user));
     };
 
     const findByLocation = async () => {
@@ -79,7 +62,7 @@ export const getDiscoverFeed = async (req, res) => {
             _id: { $ne: loggedInUserId },
             location: { $regex: new RegExp(loggedInUser.location, 'i') }
         }).limit(10);
-        return users.map(formatUserForResponse); // MODIFIED: Use the correct helper
+        return users.map(formatUserForResponse);
     };
 
     const findByCollege = async () => {
@@ -88,7 +71,7 @@ export const getDiscoverFeed = async (req, res) => {
             _id: { $ne: loggedInUserId },
             college: { $regex: new RegExp(loggedInUser.college, 'i') }
         }).limit(10);
-        return users.map(formatUserForResponse); // MODIFIED: Use the correct helper
+        return users.map(formatUserForResponse);
     };
 
     const findByAvailability = async () => {
@@ -97,7 +80,7 @@ export const getDiscoverFeed = async (req, res) => {
             _id: { $ne: loggedInUserId },
             availability: loggedInUser.availability
         }).limit(10);
-        return users.map(formatUserForResponse); // MODIFIED: Use the correct helper
+        return users.map(formatUserForResponse);
     };
 
     const [ bySkill, byLocation, byCollege, byAvailability ] = await Promise.all([
@@ -150,7 +133,6 @@ export const filterUsers = async (req, res) => {
 
         const matchedUsers = await User.find(query).select("name profilePic bio skills availability location college");
         
-        // MODIFIED: Use the correct helper for consistency
         const formattedResults = matchedUsers.map(formatUserForResponse);
         
         res.json({ success: true, results: formattedResults });
