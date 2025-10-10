@@ -4,7 +4,6 @@ import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
 import { io, Socket } from "socket.io-client";
 import { backendUrl } from "@/config/backendUrl";
-
 // --- UI Components & Utils ---
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -220,7 +219,7 @@ const Messaging = () => {
                   </div>
                   <div className="flex items-center justify-between mt-1">
                     <p className="text-sm text-muted-foreground truncate">{c.lastMessage.text}</p>
-                    {c.unreadCount && c.unreadCount > 0 && (
+                    {c.unreadCount > 0 && (
                       <div className="bg-green-500 text-white text-xs font-bold h-5 w-5 rounded-full flex items-center justify-center shrink-0">
                         {c.unreadCount}
                       </div>
